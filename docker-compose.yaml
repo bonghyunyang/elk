@@ -1,0 +1,56 @@
+version: '3'
+
+networks:
+  elk:
+    driver: bridge
+
+services:
+  # Elastic search 버전에 따라 logstash, kibana 버전 사용
+  # Elastic search 설정
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:8.7.1
+    ports:
+      - 9201:9201
+      - 9301:9301
+    volumes: 
+      - ./elasticsearch:/usr/local/elasticsearch/data
+    # Elastic search 계정정보
+    environment: 
+      discovery.type: single-node
+      # xpack 설정은 Elastic search 7.14.0 이상부터는 사용 불가
+      # xpack.security.enabled: "true"
+      # xpack.security.transport.ssl.enabled: "true"
+      ELASTIC_USERNAME: "elastic"
+      ELASTIC_PASSWORD: "MyPw123"
+    networks:
+      - elk
+
+  # Logstash 설정
+  logstash:
+    container_name: logstash
+    image: docker.elastic.co/logstash/logstash:8.7.1
+    ports:
+      - 5001:5001
+      - 9601:9601
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/local/logstash/config/logstash.yml
+      - ./logstash/pipeline/logstash.conf:/usr/local/logstash/pipeline/logstash.conf
+    depends_on: 
+      - elasticsearch
+    networks:
+      - elk
+
+  # Kibana 설정
+  kibana:
+    platform: linux/x86_64
+    container_name: kibana
+    image: kibana:8.7.1
+    ports: 
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/local/kibana/config/kibana.yml
+    networks:
+      - elk
