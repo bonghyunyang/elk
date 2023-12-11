@@ -1,7 +1,9 @@
-# 키바나 설정파일
+# config for kibana
 server.name: kibana
-server.host: "0"
-# Elasticsearch 서버 정보
+# 허용할 호스트
+# "0" : 모든 호스트 허용
+server.host: "0.0.0.0"
+# ES 연결
 elasticsearch.hosts: http://elasticsearch:9201
 elasticsearch.username: "admin"
-elasticsearch.password: "qqqq1111!"
+elasticsearch.password: ""
